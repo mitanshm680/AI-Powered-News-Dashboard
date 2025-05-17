@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 from urllib.parse import urljoin
 from bs4 import BeautifulSoup
 
+from backend.db.mongo import upsert_articles
 from backend.utils.cleaning import clean_html, clean_text, parse_datetime, validate_article
 from backend.utils.logger import log
 
@@ -38,6 +39,7 @@ class MultiSourceScraper:
                 log.info(f"✅ {name}: {len(batch)} articles scraped")
             except Exception as e:
                 log.error(f"❌ {name} scraper failed: {e}")
+        upsert_articles(articles)
         return articles
 
     def _get(self, url: str) -> BeautifulSoup:
