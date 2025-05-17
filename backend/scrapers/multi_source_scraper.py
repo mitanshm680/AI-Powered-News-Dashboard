@@ -49,173 +49,95 @@ class MultiSourceScraper:
     def _now(self) -> str:
         return datetime.now(timezone.utc).isoformat()
 
-    # Reuters
+    def _build_article(self, *, title: str, url: str, raw_content: str, published_at_raw: str, source: str) -> dict | None:
+        content = clean_text(clean_html(raw_content))
+        dt_obj = parse_datetime(published_at_raw)
+        published_at = dt_obj.isoformat() if dt_obj else self._now()
+        article = {
+            "title": title,
+            "url": url,
+            "published_at": published_at,
+            "content": content,
+            "source": source,
+        }
+        if validate_article(article):
+            return article
+        log.warning(f"Skipping invalid {source} article: {url}")
+        return None
+
+    # === Reuters ===
     def _scrape_reuters(self) -> list[dict]:
-        start_url = "https://www.reuters.com/world/"
-        soup = self._get(start_url)
+        soup = self._get("https://www.reuters.com/world/")
         links = {
             urljoin("https://www.reuters.com", a["href"].split("?")[0])
-            for a in soup.select("a[data-testid='Heading']")
+            for a in soup.select("a[data-testid='Heading']") if a.get("href")
         }
-        articles = []
-        for url in list(links)[:10]:
-            article = self._parse_reuters(url)
-            if article:
-                articles.append(article)
-        return articles
+        return [a for url in list(links)[:10] if (a := self._parse_reuters(url))]
 
     def _parse_reuters(self, url: str) -> dict | None:
         soup = self._get(url)
         title = soup.find("h1").get_text(strip=True)
-        raw_content = "\n".join(p.get_text(" ", strip=True) for p in soup.select("article p"))
+        content = "\n".join(p.get_text(" ", strip=True) for p in soup.select("article p"))
         dt = soup.find("time")
-        published_at_raw = dt["datetime"] if dt else self._now()
+        return self._build_article(
+            title=title, url=url, raw_content=content,
+            published_at_raw=dt["datetime"] if dt else self._now(), source="Reuters"
+        )
 
-        # Clean content
-        content = clean_html(raw_content)
-        content = clean_text(content)
-
-        # Parse and normalize publish date
-        dt_obj = parse_datetime(published_at_raw)
-        published_at = dt_obj.isoformat() if dt_obj else self._now()
-
-        article = {
-            "title": title,
-            "url": url,
-            "published_at": published_at,
-            "content": content,
-            "source": "Reuters",
-        }
-
-        if validate_article(article):
-            return article
-        else:
-            log.warning(f"Skipping invalid Reuters article: {url}")
-            return None
-
-    # AP News
+    # === AP News ===
     def _scrape_apnews(self) -> list[dict]:
         soup = self._get("https://apnews.com/hub/world-news")
         links = {
             urljoin("https://apnews.com", a["href"])
-            for a in soup.select("a.Link")
-            if "/article/" in a["href"]
+            for a in soup.select("a.Link") if "/article/" in a.get("href", "")
         }
-        articles = []
-        for url in list(links)[:10]:
-            article = self._parse_apnews(url)
-            if article:
-                articles.append(article)
-        return articles
+        return [a for url in list(links)[:10] if (a := self._parse_apnews(url))]
 
     def _parse_apnews(self, url: str) -> dict | None:
         soup = self._get(url)
         title = soup.find("h1").get_text(strip=True)
-        raw_content = "\n".join(p.get_text(" ", strip=True) for p in soup.select("div.Article p"))
+        content = "\n".join(p.get_text(" ", strip=True) for p in soup.select("div.Article p"))
         dt = soup.find("time")
-        published_at_raw = dt["datetime"] if dt else self._now()
+        return self._build_article(
+            title=title, url=url, raw_content=content,
+            published_at_raw=dt["datetime"] if dt else self._now(), source="AP News"
+        )
 
-        content = clean_html(raw_content)
-        content = clean_text(content)
-
-        dt_obj = parse_datetime(published_at_raw)
-        published_at = dt_obj.isoformat() if dt_obj else self._now()
-
-        article = {
-            "title": title,
-            "url": url,
-            "published_at": published_at,
-            "content": content,
-            "source": "AP News",
-        }
-
-        if validate_article(article):
-            return article
-        else:
-            log.warning(f"Skipping invalid AP News article: {url}")
-            return None
-
-    # NPR
+    # === NPR ===
     def _scrape_npr(self) -> list[dict]:
         soup = self._get("https://www.npr.org/sections/world/")
         links = {
-            a["href"] for a in soup.select("article a")
-            if a["href"].startswith("https://www.npr.org/")
+            a["href"] for a in soup.select("article a[href]") if a["href"].startswith("https://www.npr.org/")
         }
-        articles = []
-        for url in list(links)[:10]:
-            article = self._parse_npr(url)
-            if article:
-                articles.append(article)
-        return articles
+        return [a for url in list(links)[:10] if (a := self._parse_npr(url))]
 
     def _parse_npr(self, url: str) -> dict | None:
         soup = self._get(url)
         title = soup.find("h1").get_text(strip=True)
-        raw_content = "\n".join(
-            p.get_text(" ", strip=True) for p in soup.select("div[data-testid='storytext'] p")
-        )
+        content = "\n".join(p.get_text(" ", strip=True) for p in soup.select("div[data-testid='storytext'] p"))
         dt = soup.find("time")
-        published_at_raw = dt["datetime"] if dt else self._now()
+        return self._build_article(
+            title=title, url=url, raw_content=content,
+            published_at_raw=dt["datetime"] if dt else self._now(), source="NPR"
+        )
 
-        content = clean_html(raw_content)
-        content = clean_text(content)
-
-        dt_obj = parse_datetime(published_at_raw)
-        published_at = dt_obj.isoformat() if dt_obj else self._now()
-
-        article = {
-            "title": title,
-            "url": url,
-            "published_at": published_at,
-            "content": content,
-            "source": "NPR",
-        }
-
-        if validate_article(article):
-            return article
-        else:
-            log.warning(f"Skipping invalid NPR article: {url}")
-            return None
-
-    # The Guardian
+    # === The Guardian ===
     def _scrape_guardian(self) -> list[dict]:
         soup = self._get("https://www.theguardian.com/world")
         links = {
-            a["href"] for a in soup.select("a.js-headline-text") if a["href"].startswith("https://")
+            a["href"] for a in soup.select("a.js-headline-text[href]") if a["href"].startswith("https://")
         }
-        articles = []
-        for url in list(links)[:10]:
-            article = self._parse_guardian(url)
-            if article:
-                articles.append(article)
-        return articles
+        return [a for url in list(links)[:10] if (a := self._parse_guardian(url))]
 
     def _parse_guardian(self, url: str) -> dict | None:
         soup = self._get(url)
         title = soup.find("h1").get_text(strip=True)
-        raw_content = "\n".join(
+        content = "\n".join(
             p.get_text(" ", strip=True) for p in soup.select("div.article-body-commercial-selector p")
         )
         dt = soup.find("time")
-        published_at_raw = dt["datetime"] if dt and dt.has_attr("datetime") else self._now()
-
-        content = clean_html(raw_content)
-        content = clean_text(content)
-
-        dt_obj = parse_datetime(published_at_raw)
-        published_at = dt_obj.isoformat() if dt_obj else self._now()
-
-        article = {
-            "title": title,
-            "url": url,
-            "published_at": published_at,
-            "content": content,
-            "source": "The Guardian",
-        }
-
-        if validate_article(article):
-            return article
-        else:
-            log.warning(f"Skipping invalid The Guardian article: {url}")
-            return None
+        dt_attr = dt["datetime"] if dt and dt.has_attr("datetime") else self._now()
+        return self._build_article(
+            title=title, url=url, raw_content=content,
+            published_at_raw=dt_attr, source="The Guardian"
+        )
