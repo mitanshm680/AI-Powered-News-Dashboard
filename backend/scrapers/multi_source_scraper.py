@@ -9,13 +9,13 @@ from bs4 import BeautifulSoup
 from backend.utils.cleaning import clean_html, clean_text, parse_datetime, validate_article
 from backend.utils.logger import log
 
-
 HEADERS = {
     "User-Agent": (
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/124.0.0.0 Safari/537.36"
-    )
+    ),
+    "Accept-Language": "en-US,en;q=0.9",
 }
 
 
@@ -42,9 +42,13 @@ class MultiSourceScraper:
 
     def _get(self, url: str) -> BeautifulSoup:
         time.sleep(random.uniform(self.delay_min, self.delay_max))
-        res = requests.get(url, headers=HEADERS, timeout=15)
-        res.raise_for_status()
-        return BeautifulSoup(res.text, "html.parser")
+        try:
+            res = requests.get(url, headers=HEADERS, timeout=15)
+            res.raise_for_status()
+            return BeautifulSoup(res.text, "html.parser")
+        except Exception as e:
+            log.warning(f"Request failed for {url}: {e}")
+            raise
 
     def _now(self) -> str:
         return datetime.now(timezone.utc).isoformat()
@@ -75,14 +79,22 @@ class MultiSourceScraper:
         return [a for url in list(links)[:10] if (a := self._parse_reuters(url))]
 
     def _parse_reuters(self, url: str) -> dict | None:
-        soup = self._get(url)
-        title = soup.find("h1").get_text(strip=True)
-        content = "\n".join(p.get_text(" ", strip=True) for p in soup.select("article p"))
-        dt = soup.find("time")
-        return self._build_article(
-            title=title, url=url, raw_content=content,
-            published_at_raw=dt["datetime"] if dt else self._now(), source="Reuters"
-        )
+        try:
+            soup = self._get(url)
+            title_tag = soup.find("h1")
+            content_blocks = soup.select("article p")
+            dt = soup.find("time")
+            if not title_tag or not content_blocks:
+                return None
+            title = title_tag.get_text(strip=True)
+            content = "\n".join(p.get_text(" ", strip=True) for p in content_blocks)
+            return self._build_article(
+                title=title, url=url, raw_content=content,
+                published_at_raw=dt["datetime"] if dt and dt.has_attr("datetime") else self._now(), source="Reuters"
+            )
+        except Exception as e:
+            log.warning(f"Reuters parsing failed: {url} | {e}")
+            return None
 
     # === AP News ===
     def _scrape_apnews(self) -> list[dict]:
@@ -94,14 +106,22 @@ class MultiSourceScraper:
         return [a for url in list(links)[:10] if (a := self._parse_apnews(url))]
 
     def _parse_apnews(self, url: str) -> dict | None:
-        soup = self._get(url)
-        title = soup.find("h1").get_text(strip=True)
-        content = "\n".join(p.get_text(" ", strip=True) for p in soup.select("div.Article p"))
-        dt = soup.find("time")
-        return self._build_article(
-            title=title, url=url, raw_content=content,
-            published_at_raw=dt["datetime"] if dt else self._now(), source="AP News"
-        )
+        try:
+            soup = self._get(url)
+            title_tag = soup.find("h1")
+            content_blocks = soup.select("div.Article p")
+            dt = soup.find("time")
+            if not title_tag or not content_blocks:
+                return None
+            title = title_tag.get_text(strip=True)
+            content = "\n".join(p.get_text(" ", strip=True) for p in content_blocks)
+            return self._build_article(
+                title=title, url=url, raw_content=content,
+                published_at_raw=dt["datetime"] if dt and dt.has_attr("datetime") else self._now(), source="AP News"
+            )
+        except Exception as e:
+            log.warning(f"AP parsing failed: {url} | {e}")
+            return None
 
     # === NPR ===
     def _scrape_npr(self) -> list[dict]:
@@ -112,14 +132,22 @@ class MultiSourceScraper:
         return [a for url in list(links)[:10] if (a := self._parse_npr(url))]
 
     def _parse_npr(self, url: str) -> dict | None:
-        soup = self._get(url)
-        title = soup.find("h1").get_text(strip=True)
-        content = "\n".join(p.get_text(" ", strip=True) for p in soup.select("div[data-testid='storytext'] p"))
-        dt = soup.find("time")
-        return self._build_article(
-            title=title, url=url, raw_content=content,
-            published_at_raw=dt["datetime"] if dt else self._now(), source="NPR"
-        )
+        try:
+            soup = self._get(url)
+            title_tag = soup.find("h1")
+            content_blocks = soup.select("div[data-testid='storytext'] p")
+            dt = soup.find("time")
+            if not title_tag or not content_blocks:
+                return None
+            title = title_tag.get_text(strip=True)
+            content = "\n".join(p.get_text(" ", strip=True) for p in content_blocks)
+            return self._build_article(
+                title=title, url=url, raw_content=content,
+                published_at_raw=dt["datetime"] if dt and dt.has_attr("datetime") else self._now(), source="NPR"
+            )
+        except Exception as e:
+            log.warning(f"NPR parsing failed: {url} | {e}")
+            return None
 
     # === The Guardian ===
     def _scrape_guardian(self) -> list[dict]:
@@ -130,14 +158,20 @@ class MultiSourceScraper:
         return [a for url in list(links)[:10] if (a := self._parse_guardian(url))]
 
     def _parse_guardian(self, url: str) -> dict | None:
-        soup = self._get(url)
-        title = soup.find("h1").get_text(strip=True)
-        content = "\n".join(
-            p.get_text(" ", strip=True) for p in soup.select("div.article-body-commercial-selector p")
-        )
-        dt = soup.find("time")
-        dt_attr = dt["datetime"] if dt and dt.has_attr("datetime") else self._now()
-        return self._build_article(
-            title=title, url=url, raw_content=content,
-            published_at_raw=dt_attr, source="The Guardian"
-        )
+        try:
+            soup = self._get(url)
+            title_tag = soup.find("h1")
+            content_blocks = soup.select("div.article-body-commercial-selector p")
+            dt = soup.find("time")
+            if not title_tag or not content_blocks:
+                return None
+            title = title_tag.get_text(strip=True)
+            content = "\n".join(p.get_text(" ", strip=True) for p in content_blocks)
+            dt_attr = dt["datetime"] if dt and dt.has_attr("datetime") else self._now()
+            return self._build_article(
+                title=title, url=url, raw_content=content,
+                published_at_raw=dt_attr, source="The Guardian"
+            )
+        except Exception as e:
+            log.warning(f"Guardian parsing failed: {url} | {e}")
+            return None
