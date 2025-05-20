@@ -38,6 +38,13 @@ HEADERS = {
     "Accept-Language": "en-US,en;q=0.5",
     "Connection": "keep-alive",
     "Cache-Control": "max-age=0",
+    "Referer": "https://www.reuters.com",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "same-origin",
+    "Sec-Fetch-User": "?1",
+    "Upgrade-Insecure-Requests": "1",
+    "DNT": "1"
 }
 
 # Define news sources with their RSS/archive URLs
@@ -320,8 +327,107 @@ def detect_article_category(title: str, text: str) -> str:
 def scrape_article(url: str) -> Optional[Dict]:
     """Scrape article content from URL with enhanced error handling."""
     try:
+        # Special handling for Reuters articles due to their authentication requirements
+        if "reuters.com" in url:
+            response = requests.get(url, headers=HEADERS, timeout=15)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, 'html.parser')
+            
+            # Extract title - Reuters uses multiple possible title selectors
+            title = ""
+            title_selectors = [
+                "h1[data-testid='Heading']",
+                "h1.article-header__title__3Y2hh",
+                "h1.text__text__1FZLe",
+                ".article-header h1"
+            ]
+            for selector in title_selectors:
+                title_elem = soup.select_one(selector)
+                if title_elem:
+                    title = title_elem.text.strip()
+                    break
+            
+            # Extract text - Reuters uses multiple possible content selectors
+            text = ""
+            content_selectors = [
+                "p[data-testid='paragraph-']",  # Numbered paragraphs
+                ".article-body__content__17Yit p",
+                ".paywall-article p",
+                ".article__content p",
+                ".StandardArticleBody_body p",
+                ".article-body p"  # New Reuters format
+            ]
+            for selector in content_selectors:
+                paragraphs = soup.select(selector)
+                if paragraphs:
+                    text = "\n".join([p.text.strip() for p in paragraphs if p.text.strip()])
+                    if text:  # If we found content, stop looking
+                        break
+            
+            # If still no text, try a more generic approach
+            if not text:
+                # Look for any paragraph that might contain article content
+                paragraphs = soup.find_all('p')
+                text = "\n".join([p.text.strip() for p in paragraphs 
+                                if len(p.text.strip()) > 50  # Only substantial paragraphs
+                                and not any(skip in p.get('class', []) 
+                                          for skip in ['caption', 'footer', 'header', 'meta'])])
+            
+            # Extract image - Reuters uses multiple possible image selectors
+            image_url = ""
+            image_selectors = [
+                "img[data-testid='Image']",
+                ".article-header__image__2nPGa img",
+                ".article__hero-image img",
+                "meta[property='og:image']",
+                ".article-body img"  # New Reuters format
+            ]
+            for selector in image_selectors:
+                img_elem = soup.select_one(selector)
+                if img_elem:
+                    image_url = img_elem.get("src") or img_elem.get("content", "")
+                    if image_url:
+                        break
+            
+            # Extract date - Reuters uses multiple possible date selectors
+            published_at = datetime.utcnow().isoformat()
+            date_selectors = [
+                "time",
+                "meta[property='article:published_time']",
+                ".ArticleHeader_date",
+                ".article-info time"  # New Reuters format
+            ]
+            for selector in date_selectors:
+                time_elem = soup.select_one(selector)
+                if time_elem:
+                    datetime_str = time_elem.get("datetime") or time_elem.get("content")
+                    if datetime_str:
+                        try:
+                            published_at = datetime.fromisoformat(datetime_str).isoformat()
+                            break
+                        except ValueError:
+                            pass
+            
+            # Validate article
+            if not title or not text or len(text) < 100:
+                logger.warning(f"Invalid Reuters article content for {url}: Title exists: {bool(title)}, Text length: {len(text) if text else 0}")
+                return None
+                
+            category = detect_article_category(title, text)
+            
+            return {
+                "title": title,
+                "text": text,
+                "url": url,
+                "image_url": image_url,
+                "published_at": published_at,
+                "keywords": [],  # Reuters articles don't expose keywords
+                "category": category,
+                "source_summary": ""  # No built-in summary for Reuters
+            }
+        
+        # For non-Reuters articles, use the original newspaper3k approach
         article = Article(url)
-        # Set user agent to avoid blocking
         article.config.browser_user_agent = HEADERS["User-Agent"]
         article.download()
         article.parse()
