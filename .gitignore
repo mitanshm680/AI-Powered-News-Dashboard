@@ -1,3 +1,7 @@
 .env
 venv
 mongodb_data
+__pycache__
+news_fetcher.log
+scheduler.log
+scheduler_status.json
