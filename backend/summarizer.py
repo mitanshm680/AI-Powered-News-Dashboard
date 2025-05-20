@@ -23,7 +23,7 @@ load_dotenv()
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")  # Default to empty string if not found
 
 # Endpoint
-GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
+GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
 def summarize_with_gemini(text: str, source: str = "", category: str = "general") -> Optional[str]:
     """Summarize text using Google's Gemini API."""
