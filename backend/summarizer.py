@@ -1,5 +1,5 @@
 """
-Enhanced text summarization module using Google's Gemini API
+Enhanced text summarization module using Google's Gemini API.
 """
 import os
 import requests

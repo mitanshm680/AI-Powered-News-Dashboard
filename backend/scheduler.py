@@ -1,5 +1,5 @@
 """
-Advanced scheduler for news fetching with configurable intervals and monitoring
+Advanced scheduler for news fetching with configurable intervals and monitoring.
 """
 import time
 import schedule
