@@ -1,12 +1,26 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/1.png" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SmartBrief</title>
     <meta name="description" content="Stay informed with AI-summarized news from around the world">
     <meta name="theme-color" content="#1a365d" />
+    <script>
+      // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+      function updateTheme() {
+        if (localStorage.getItem('darkMode') === 'true' ||
+            (!localStorage.getItem('darkMode') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      }
+      updateTheme();
+      // Listen for localStorage changes
+      window.addEventListener('storage', updateTheme);
+    </script>
   </head>
   <body>
     <div id="root"></div>

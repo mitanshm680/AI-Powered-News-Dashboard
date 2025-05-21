@@ -23,7 +23,7 @@ const NewsCard: React.FC<NewsCardProps> = ({ article, onSave, onShare }) => {
   return (
     <>
       <div 
-        className="bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg h-full cursor-pointer"
+        className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg h-full cursor-pointer"
         onClick={handleCardClick}
       >
         <div className="relative h-48">
@@ -40,16 +40,16 @@ const NewsCard: React.FC<NewsCardProps> = ({ article, onSave, onShare }) => {
         </div>
         
         <div className="p-4">
-          <h2 className="text-lg font-bold text-gray-800 mb-2 line-clamp-2 leading-tight">
+          <h2 className="text-lg font-bold text-gray-800 dark:text-white mb-2 line-clamp-2 leading-tight">
             {article.title}
           </h2>
           
-          <p className="text-gray-600 mb-4 text-sm leading-relaxed line-clamp-3">
+          <p className="text-gray-600 dark:text-gray-300 mb-4 text-sm leading-relaxed line-clamp-3">
             {article.summary}
           </p>
 
-          <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-100">
-            <div className="text-sm text-gray-500">
+          <div className="flex items-center justify-between mt-auto pt-2 border-t border-gray-100 dark:border-gray-700">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
               {formatArticleDate(article.publishedAt)}
             </div>
             <div className="flex space-x-2">
@@ -57,7 +57,7 @@ const NewsCard: React.FC<NewsCardProps> = ({ article, onSave, onShare }) => {
                 href={article.fullArticleUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-blue-600 transition-colors"
+                className="text-gray-400 hover:text-blue-600 dark:text-gray-500 dark:hover:text-blue-400 transition-colors"
                 title="Open article in new tab"
                 onClick={(e) => e.stopPropagation()} // Prevent card click when clicking link
               >
@@ -70,7 +70,7 @@ const NewsCard: React.FC<NewsCardProps> = ({ article, onSave, onShare }) => {
                   e.stopPropagation(); // Prevent card click when clicking share
                   onShare(article);
                 }}
-                className="text-gray-400 hover:text-blue-600 transition-colors"
+                className="text-gray-400 hover:text-blue-600 dark:text-gray-500 dark:hover:text-blue-400 transition-colors"
                 title="Share article"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -82,7 +82,11 @@ const NewsCard: React.FC<NewsCardProps> = ({ article, onSave, onShare }) => {
                   e.stopPropagation(); // Prevent card click when clicking save
                   onSave(article.id);
                 }}
-                className={`transition-colors ${article.saved ? 'text-yellow-500' : 'text-gray-400 hover:text-yellow-500'}`}
+                className={`transition-colors ${
+                  article.saved 
+                    ? 'text-yellow-500 dark:text-yellow-400' 
+                    : 'text-gray-400 hover:text-yellow-500 dark:text-gray-500 dark:hover:text-yellow-400'
+                }`}
                 title={article.saved ? 'Remove from saved' : 'Save article'}
               >
                 <svg className="w-5 h-5" fill={article.saved ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 24 24">
