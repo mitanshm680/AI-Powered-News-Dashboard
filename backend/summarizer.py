@@ -4,12 +4,10 @@ Enhanced text summarization module using Google's Gemini API.
 import os
 import requests
 import time
-from typing import Optional, List
+from typing import Optional
 from dotenv import load_dotenv
 import logging
 from newspaper import fulltext
-from datetime import datetime, timedelta
-from threading import Lock
 
 # Configure logging
 logging.basicConfig(
@@ -27,40 +25,11 @@ GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")  # Default to empty string if n
 # Endpoint
 GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
 
-# Rate limiting configuration
-RATE_LIMIT_RPM = 15  # Gemini's rate limit of 15 requests per minute
-RATE_WINDOW = 70  # Window size in seconds
-api_calls: List[float] = []  # Timestamps of API calls
-api_lock = Lock()  # Thread-safe lock for rate limiting
-
-def wait_for_rate_limit():
-    """Wait if necessary to respect the rate limit."""
-    with api_lock:
-        now = time.time()
-        
-        # If we've hit the rate limit, wait until we can make another request
-        if len(api_calls) >= RATE_LIMIT_RPM:
-            wait_time = api_calls[0] + RATE_WINDOW - now
-            if wait_time > 0:
-                logger.info(f"Rate limit reached, waiting {wait_time:.2f} seconds")
-                time.sleep(wait_time)
-                now = time.time()  # Update current time after waiting
-        
-        # Remove timestamps older than our window
-        while api_calls and api_calls[0] < now - RATE_WINDOW:
-            api_calls.pop(0)
-        
-        # Add current timestamp
-        api_calls.append(now)
-
 def summarize_with_gemini(text: str, source: str = "", category: str = "general") -> Optional[str]:
     """Summarize text using Google's Gemini API."""
     if not GEMINI_API_KEY:
         logger.warning("Gemini API key not found")
         return None
-    
-    # Wait for rate limit if necessary
-    wait_for_rate_limit()
         
     prompt = f"""
     Summarize the following {category} news article in 3-4 concise sentences that capture the key points.

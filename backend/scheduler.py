@@ -10,10 +10,9 @@ import signal
 import json
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, Any, Callable, List
+from typing import Dict, Any, Callable
 
-from fetch_and_store import fetch_all_sources, clean_old_articles, process_source
-from scraper import get_article_links, SOURCES
+from fetch_and_store import fetch_all_sources, clean_old_articles
 from db import db_manager
 
 # Configure logging
@@ -33,9 +32,7 @@ DEFAULT_CONFIG = {
     "cleanup_interval_hours": 12,
     "cleanup_days_threshold": 30,
     "max_consecutive_failures": 3,
-    "hours_to_pause_after_failures": 1,
-    "max_articles_per_batch": 10,  # Limit articles per batch to stay under Gemini's rate limit
-    "batch_processing_delay": 70  # Wait 60 seconds between batches to respect rate limit
+    "hours_to_pause_after_failures": 1
 }
 
 # Path to config and status files
@@ -155,33 +152,8 @@ def run_with_error_handling(job_func: Callable):
         generate_status_report()
 
 def fetch_job():
-    """Wrapper for the fetch job with error handling and rate limiting"""
-    config = load_config()
-    
-    def rate_limited_fetch():
-        """Fetch articles with rate limiting"""
-        results = {}
-        for source, url in SOURCES.items():
-            # Process source and get links
-            links = get_article_links(source, url)
-            if not links:
-                continue
-                
-            # Process articles in smaller batches to respect rate limits
-            batch_size = config["max_articles_per_batch"]
-            for i in range(0, len(links), batch_size):
-                batch = links[i:i + batch_size]
-                batch_results = process_source_batch(source, batch)
-                results[source] = results.get(source, 0) + batch_results
-                
-                # Wait between batches to respect rate limits
-                if i + batch_size < len(links):
-                    logger.info(f"Waiting {config['batch_processing_delay']} seconds before next batch...")
-                    time.sleep(config['batch_processing_delay'])
-        
-        return results
-    
-    run_with_error_handling(rate_limited_fetch)
+    """Wrapper for the fetch job with error handling"""
+    run_with_error_handling(fetch_all_sources)
 
 def cleanup_job():
     """Wrapper for the cleanup job with error handling"""
@@ -296,18 +268,6 @@ signal.signal(signal.SIGTERM, handle_signal)
 
 # Track start time for uptime calculation
 start_time = datetime.utcnow()
-
-def process_source_batch(source: str, links: List[str]) -> int:
-    """Process a batch of articles from a source with rate limiting."""
-    articles_stored = 0
-    for link in links:
-        try:
-            # Process single article
-            if process_source(source, {source: link}):
-                articles_stored += 1
-        except Exception as e:
-            logger.error(f"Error processing article {link}: {e}")
-    return articles_stored
 
 if __name__ == "__main__":
     try:
