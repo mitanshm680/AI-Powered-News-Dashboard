@@ -51,3 +51,39 @@ export const formatRelativeTime = (dateString: string): string => {
     year: 'numeric'
   });
 };
+
+export const formatArticleDate = (dateString: string): string => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  const diffInDays = Math.floor(diffInHours / 24);
+
+  // For articles less than a minute old
+  if (diffInSeconds < 60) {
+    return 'Just now';
+  }
+
+  // For articles less than an hour old
+  if (diffInMinutes < 60) {
+    return `${diffInMinutes}m ago`;
+  }
+
+  // For articles less than a day old
+  if (diffInHours < 24) {
+    return `${diffInHours}h ago`;
+  }
+
+  // For articles less than 7 days old
+  if (diffInDays < 7) {
+    return `${diffInDays}d ago`;
+  }
+
+  // For older articles, use the date
+  return date.toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+};

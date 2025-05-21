@@ -14,6 +14,9 @@ function App() {
     handleSaveArticle,
     loading,
     error,
+    loadMore,
+    hasMore,
+    totalCount
   } = useArticles();
 
   const [shareArticle, setShareArticle] = useState<Article | null>(null);
@@ -33,11 +36,13 @@ function App() {
         onShareArticle={handleShareArticle}
       />
       
-      <main className="container mx-auto max-w-2xl px-4">
-        <CategorySelector
-          selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
-        />
+      <main className="container mx-auto px-4 py-6">
+        <div className="mb-6 bg-white rounded-lg shadow-sm">
+          <CategorySelector
+            selectedCategory={selectedCategory}
+            onSelectCategory={setSelectedCategory}
+          />
+        </div>
         
         {error && (
           <div className="my-4 p-4 bg-red-50 text-red-700 rounded-lg">
@@ -45,22 +50,15 @@ function App() {
           </div>
         )}
 
-        {loading ? (
-          <div className="space-y-4 mt-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="bg-white p-4 rounded-lg shadow animate-pulse">
-                <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <NewsFeed
-            articles={articles}
-            onSaveArticle={handleSaveArticle}
-            onShareArticle={handleShareArticle}
-          />
-        )}
+        <NewsFeed
+          articles={articles}
+          onSaveArticle={handleSaveArticle}
+          onShareArticle={handleShareArticle}
+          loading={loading}
+          hasMore={hasMore}
+          onLoadMore={loadMore}
+          totalCount={totalCount}
+        />
       </main>
 
       {shareArticle && (

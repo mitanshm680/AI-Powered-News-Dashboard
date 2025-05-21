@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { articlesApi, Article } from '../services/api';
 import { sortArticlesByDate } from '../utils/sorting';
 
@@ -7,29 +7,51 @@ export const useArticles = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
 
-  const fetchArticles = async () => {
+  const fetchArticles = useCallback(async (pageNum: number) => {
     try {
       setLoading(true);
       setError(null);
       const response = await articlesApi.getArticles({
         category: selectedCategory === 'all' ? undefined : selectedCategory,
-        pageSize: 20,
+        page: pageNum,
+        pageSize: 30,
         sortBy: 'publishedAt',
         sortOrder: 'desc',
       });
-      // Ensure articles are sorted by date even if API response isn't
-      setArticles(sortArticlesByDate(response.articles));
+
+      if (pageNum === 1) {
+        setArticles(response.articles);
+      } else {
+        setArticles(prev => [...prev, ...response.articles]);
+      }
+
+      setTotalCount(response.totalCount);
+      setHasMore(pageNum < response.totalPages);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch articles');
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchArticles();
   }, [selectedCategory]);
+
+  // Reset pagination when category changes
+  useEffect(() => {
+    setPage(1);
+    setHasMore(true);
+    fetchArticles(1);
+  }, [selectedCategory, fetchArticles]);
+
+  const loadMore = async () => {
+    if (!loading && hasMore) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      await fetchArticles(nextPage);
+    }
+  };
 
   const handleSaveArticle = async (id: string) => {
     try {
@@ -63,6 +85,9 @@ export const useArticles = () => {
     handleSaveArticle,
     loading,
     error,
-    refetch: fetchArticles,
+    loadMore,
+    hasMore,
+    totalCount,
+    refetch: () => fetchArticles(1),
   };
 };
