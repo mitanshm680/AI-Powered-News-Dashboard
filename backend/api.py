@@ -1,6 +1,6 @@
 """
 Enhanced FastAPI backend for SmartBrief News Dashboard
-Provides robust API endpoints with error handling, validation, and comprehensive features
+Provides robust API endpoints with error handling, validation, and comprehensive features.
 """
 import os
 import logging
