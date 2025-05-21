@@ -1,0 +1,102 @@
+{
+  "categories": [
+    { "id": "1", "name": "All", "slug": "all" },
+    { "id": "2", "name": "World", "slug": "world" },
+    { "id": "3", "name": "Tech", "slug": "tech" },
+    { "id": "4", "name": "Business", "slug": "business" },
+    { "id": "5", "name": "Sports", "slug": "sports" },
+    { "id": "6", "name": "Entertainment", "slug": "entertainment" },
+    { "id": "7", "name": "Science", "slug": "science" },
+    { "id": "8", "name": "Health", "slug": "health" }
+  ],
+  "articles": [
+    {
+      "id": "1",
+      "title": "SpaceX Successfully Launches Starship for Orbital Test Flight",
+      "summary": "SpaceX's Starship rocket completed its first successful orbital test flight, reaching space before splashing down in the Indian Ocean. The milestone marks a significant step toward Elon Musk's vision of Mars colonization. (Reuters)",
+      "category": "tech",
+      "source": "Reuters",
+      "imageUrl": "https://images.pexels.com/photos/23764/pexels-photo.jpg?auto=compress&cs=tinysrgb&w=1260&h=750",
+      "fullArticleUrl": "https://example.com/article1",
+      "publishedAt": "2025-03-15T09:45:00Z",
+      "saved": false
+    },
+    {
+      "id": "2",
+      "title": "Global Climate Summit Reaches Breakthrough Agreement",
+      "summary": "World leaders have finalized a landmark climate agreement committing to carbon neutrality by 2045, with binding targets and financial penalties for non-compliance. The deal comes after two weeks of intense negotiations. (AP News)",
+      "category": "world",
+      "source": "AP News",
+      "imageUrl": "https://images.pexels.com/photos/2990650/pexels-photo-2990650.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750",
+      "fullArticleUrl": "https://example.com/article2",
+      "publishedAt": "2025-03-14T21:30:00Z",
+      "saved": false
+    },
+    {
+      "id": "3",
+      "title": "AI Breakthrough: New Model Shows Human-Like Reasoning",
+      "summary": "Researchers have unveiled a breakthrough AI model capable of abstract reasoning comparable to humans. The system demonstrated problem-solving abilities on previously unseen tasks, suggesting a significant advance in artificial general intelligence. (MIT Technology Review)",
+      "category": "tech",
+      "source": "MIT Technology Review",
+      "imageUrl": "https://images.pexels.com/photos/8386440/pexels-photo-8386440.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750",
+      "fullArticleUrl": "https://example.com/article3",
+      "publishedAt": "2025-03-14T16:15:00Z",
+      "saved": true
+    },
+    {
+      "id": "4",
+      "title": "Federal Reserve Raises Interest Rates Amid Inflation Concerns",
+      "summary": "The Federal Reserve increased interest rates by 0.25%, citing persistent inflation pressures. Chair Powell indicated that further hikes may be necessary if economic data continues to show overheating, despite cooling in some sectors. (Financial Times)",
+      "category": "business",
+      "source": "Financial Times",
+      "imageUrl": "https://images.pexels.com/photos/259027/pexels-photo-259027.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750",
+      "fullArticleUrl": "https://example.com/article4",
+      "publishedAt": "2025-03-14T14:00:00Z",
+      "saved": false
+    },
+    {
+      "id": "5",
+      "title": "Major Breakthrough in Alzheimer's Treatment Shows Promise",
+      "summary": "A new drug therapy has shown significant cognitive improvement in early-stage Alzheimer's patients during phase III clinical trials. Researchers report the treatment reduced amyloid plaque buildup and slowed disease progression by 42%. (The Guardian)",
+      "category": "health",
+      "source": "The Guardian",
+      "imageUrl": "https://images.pexels.com/photos/3800795/pexels-photo-3800795.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750",
+      "fullArticleUrl": "https://example.com/article5",
+      "publishedAt": "2025-03-14T12:30:00Z",
+      "saved": false
+    },
+    {
+      "id": "6",
+      "title": "Olympic Games to Introduce Three New Sports in 2028",
+      "summary": "The International Olympic Committee has announced the addition of cricket, squash, and esports to the 2028 Los Angeles Olympic Games. The decision aims to attract younger audiences and reflects evolving global sporting interests. (BBC)",
+      "category": "sports",
+      "source": "BBC",
+      "imageUrl": "https://images.pexels.com/photos/2128038/pexels-photo-2128038.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750",
+      "fullArticleUrl": "https://example.com/article6",
+      "publishedAt": "2025-03-14T10:15:00Z",
+      "saved": true
+    },
+    {
+      "id": "7",
+      "title": "Hollywood Studios Announce Major Shift to Streaming-First Model",
+      "summary": "Three major Hollywood studios have announced plans to release most films directly to streaming platforms, with limited theatrical releases. The strategy shift comes amid changing viewer habits and streaming profitability. (Variety)",
+      "category": "entertainment",
+      "source": "Variety",
+      "imageUrl": "https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750",
+      "fullArticleUrl": "https://example.com/article7",
+      "publishedAt": "2025-03-14T08:45:00Z",
+      "saved": false
+    },
+    {
+      "id": "8",
+      "title": "Astronomers Discover Earth-like Planet in Habitable Zone",
+      "summary": "Astronomers have identified a potentially habitable exoplanet just 40 light-years from Earth. The rocky world orbits within its star's habitable zone and shows evidence of a stable atmosphere, making it a prime candidate for future observation. (NASA)",
+      "category": "science",
+      "source": "NASA",
+      "imageUrl": "https://images.pexels.com/photos/2150/sky-space-dark-galaxy.jpg?auto=compress&cs=tinysrgb&w=1260&h=750",
+      "fullArticleUrl": "https://example.com/article8",
+      "publishedAt": "2025-03-13T23:30:00Z",
+      "saved": false
+    }
+  ]
+}
