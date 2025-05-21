@@ -4,6 +4,16 @@
 export const formatRelativeTime = (dateString: string): string => {
   const date = new Date(dateString);
   const now = new Date();
+  
+  // Handle future dates
+  if (date > now) {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric'
+    });
+  }
+  
   const diffInMs = now.getTime() - date.getTime();
   
   // Convert to seconds
@@ -30,19 +40,14 @@ export const formatRelativeTime = (dateString: string): string => {
   // Convert to days
   const diffInDay = Math.floor(diffInHour / 24);
   
-  if (diffInDay < 30) {
+  if (diffInDay < 7) {
     return `${diffInDay}d ago`;
   }
   
-  // Convert to months
-  const diffInMonth = Math.floor(diffInDay / 30);
-  
-  if (diffInMonth < 12) {
-    return `${diffInMonth}mo ago`;
-  }
-  
-  // Convert to years
-  const diffInYear = Math.floor(diffInMonth / 12);
-  
-  return `${diffInYear}y ago`;
+  // For older dates, show the actual date
+  return new Date(dateString).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric'
+  });
 };

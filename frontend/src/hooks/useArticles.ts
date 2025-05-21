@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { articlesApi, Article } from '../services/api';
+import { sortArticlesByDate } from '../utils/sorting';
 
 export const useArticles = () => {
   const [articles, setArticles] = useState<Article[]>([]);
@@ -17,7 +18,8 @@ export const useArticles = () => {
         sortBy: 'publishedAt',
         sortOrder: 'desc',
       });
-      setArticles(response.articles);
+      // Ensure articles are sorted by date even if API response isn't
+      setArticles(sortArticlesByDate(response.articles));
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to fetch articles');
     } finally {
@@ -36,10 +38,12 @@ export const useArticles = () => {
 
       await articlesApi.toggleSaveArticle(id, !article.saved);
       setArticles(prevArticles =>
-        prevArticles.map(article =>
-          article.id === id
-            ? { ...article, saved: !article.saved }
-            : article
+        sortArticlesByDate(
+          prevArticles.map(article =>
+            article.id === id
+              ? { ...article, saved: !article.saved }
+              : article
+          )
         )
       );
     } catch (err) {
@@ -48,7 +52,7 @@ export const useArticles = () => {
   };
 
   const getSavedArticles = () => {
-    return articles.filter(article => article.saved);
+    return sortArticlesByDate(articles.filter(article => article.saved));
   };
 
   return {

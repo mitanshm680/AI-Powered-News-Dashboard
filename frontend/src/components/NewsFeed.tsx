@@ -1,6 +1,7 @@
 import React from 'react';
 import { Article } from '../types';
 import NewsCard from './NewsCard';
+import { sortArticlesByDate } from '../utils/sorting';
 
 interface NewsFeedProps {
   articles: Article[];
@@ -21,9 +22,11 @@ const NewsFeed: React.FC<NewsFeedProps> = ({
     );
   }
 
+  const sortedArticles = sortArticlesByDate(articles);
+
   return (
     <div className="pb-6">
-      {articles.map((article) => (
+      {sortedArticles.map((article) => (
         <div key={article.id} className="px-4 py-2">
           <NewsCard
             article={article}
