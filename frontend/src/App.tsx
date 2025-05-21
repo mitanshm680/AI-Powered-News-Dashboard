@@ -28,7 +28,10 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+      <Header 
+        onSaveArticle={handleSaveArticle}
+        onShareArticle={handleShareArticle}
+      />
       
       <main className="container mx-auto max-w-2xl px-4">
         <CategorySelector

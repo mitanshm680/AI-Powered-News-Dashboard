@@ -50,6 +50,17 @@ export const articlesApi = {
     return data;
   },
 
+  searchArticles: async (params: {
+    q: string;
+    category?: string;
+    source?: string;
+    page?: number;
+    pageSize?: number;
+  }) => {
+    const { data } = await api.get<ArticleList>('/articles/search', { params });
+    return data;
+  },
+
   getArticleById: async (id: string) => {
     const { data } = await api.get(`/article/${id}`);
     return data;
