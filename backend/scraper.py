@@ -303,24 +303,78 @@ def get_article_links(source: str, url: str) -> List[str]:
     return result
 
 def detect_article_category(title: str, text: str) -> str:
-    """Detect article category based on content."""
-    # Simple keyword-based categorization
+    """Detect article category based on content using enhanced keyword matching."""
+    # Comprehensive keyword-based categorization with weighted matching
     categories = {
-        "politics": ["government", "election", "president", "minister", "parliament", "vote", "political"],
-        "technology": ["tech", "computer", "software", "internet", "digital", "ai", "artificial intelligence"],
-        "business": ["economy", "market", "stock", "trade", "company", "financial", "investment"],
-        "health": ["covid", "virus", "disease", "medical", "hospital", "doctor", "healthcare", "health"],
-        "entertainment": ["movie", "film", "music", "celebrity", "actor", "actress", "concert"],
-        "sports": ["football", "soccer", "basketball", "tournament", "championship", "olympic", "player"],
-        "science": ["research", "scientist", "study", "discovery", "space", "nasa", "physics", "biology"],
-        "environment": ["climate", "pollution", "environmental", "green", "sustainability", "conservation"]
+        "politics": [
+            "government", "election", "president", "minister", "parliament", "vote", "political",
+            "congress", "senate", "democracy", "policy", "legislation", "campaign", "diplomatic",
+            "republican", "democrat", "bill", "law", "federal", "governor"
+        ],
+        "technology": [
+            "tech", "computer", "software", "internet", "digital", "ai", "artificial intelligence",
+            "cybersecurity", "blockchain", "startup", "innovation", "app", "robot", "automation",
+            "machine learning", "programming", "data", "cloud", "virtual reality", "cryptocurrency"
+        ],
+        "business": [
+            "economy", "market", "stock", "trade", "company", "financial", "investment",
+            "revenue", "profit", "startup", "entrepreneur", "industry", "corporate", "commerce",
+            "banking", "inflation", "economic", "gdp", "nasdaq", "dow jones"
+        ],
+        "health": [
+            "covid", "virus", "disease", "medical", "hospital", "doctor", "healthcare", "health",
+            "patient", "treatment", "medicine", "vaccine", "research", "clinical", "drug",
+            "therapy", "mental health", "wellness", "diagnosis", "pharmaceutical"
+        ],
+        "entertainment": [
+            "movie", "film", "music", "celebrity", "actor", "actress", "concert",
+            "hollywood", "tv", "television", "streaming", "award", "star", "entertainment",
+            "show", "series", "album", "theater", "festival", "performance"
+        ],
+        "sports": [
+            "football", "soccer", "basketball", "tournament", "championship", "olympic", "player",
+            "game", "match", "team", "athlete", "sport", "baseball", "tennis", "golf",
+            "league", "coach", "score", "win", "competition"
+        ],
+        "science": [
+            "research", "scientist", "study", "discovery", "space", "nasa", "physics", "biology",
+            "chemistry", "experiment", "laboratory", "theory", "quantum", "astronomy", "gene",
+            "scientific", "molecule", "particle", "evolution", "universe"
+        ],
+        "environment": [
+            "climate", "pollution", "environmental", "green", "sustainability", "conservation",
+            "renewable", "energy", "carbon", "emission", "ecosystem", "biodiversity", "solar",
+            "wind power", "recycling", "waste", "wildlife", "forest", "ocean", "earth"
+        ],
+        "world": [
+            "international", "global", "foreign", "world", "country", "nation", "diplomatic",
+            "embassy", "treaty", "war", "peace", "crisis", "summit", "trade", "united nations",
+            "eu", "european union", "asia", "africa", "middle east"
+        ]
     }
     
     content = (title + " " + text).lower()
+    category_scores = {cat: 0 for cat in categories}
     
+    # Calculate score for each category
     for category, keywords in categories.items():
-        if any(keyword in content for keyword in keywords):
-            return category
+        # Title matches are worth more (3x)
+        title_lower = title.lower()
+        for keyword in keywords:
+            if keyword in title_lower:
+                category_scores[category] += 3
+            if keyword in content:
+                category_scores[category] += 1
+    
+    # Get category with highest score
+    max_score = max(category_scores.values())
+    if max_score > 0:
+        # If there's a tie, prefer the category that matches in the title
+        top_categories = [cat for cat, score in category_scores.items() if score == max_score]
+        for cat in top_categories:
+            if any(keyword in title.lower() for keyword in categories[cat]):
+                return cat
+        return top_categories[0]
     
     return "general"
 
