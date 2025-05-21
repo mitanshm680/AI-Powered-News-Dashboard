@@ -5,3 +5,5 @@ __pycache__
 news_fetcher.log
 scheduler.log
 scheduler_status.json
+__pycache__/
+*.pyc
