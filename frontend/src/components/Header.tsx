@@ -8,7 +8,7 @@ const Header: React.FC = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <Newspaper className="h-6 w-6 text-blue-900" />
-            <h1 className="ml-2 text-xl font-bold text-blue-900">SmartBrief News</h1>
+            <h1 className="ml-2 text-xl font-bold text-blue-900">SmartBrief</h1>
           </div>
           
           <div className="flex items-center space-x-4">
