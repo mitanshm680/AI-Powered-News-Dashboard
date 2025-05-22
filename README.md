@@ -1,6 +1,6 @@
-# News Summary Dashboard
+# SmartBrief - AI Powered News Dashboard
 
-A full-stack web application that automatically collects, summarizes, and categorizes news articles from multiple sources. The application features a responsive React frontend and a Python backend with FastAPI.
+A full-stack web application that automatically collects, summarizes, and categorizes news articles from multiple sources. The application features a responsive React frontend, a Python backend with FastAPI, and uses MongoDB as the database for efficient storage and retrieval of news articles.
 
 ## Features
 
